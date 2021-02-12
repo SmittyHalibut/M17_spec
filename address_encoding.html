@@ -270,15 +270,16 @@ encoding.</p>
   <span class="kt">uint64_t</span> <span class="n">encoded</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
   <span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">callsign</span> <span class="o">+</span> <span class="n">strlen</span><span class="p">(</span><span class="n">callsign</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">callsign</span><span class="p">;</span> <span class="n">p</span><span class="o">--</span> <span class="p">)</span> <span class="p">{</span>
     <span class="n">encoded</span> <span class="o">*=</span> <span class="mi">40</span><span class="p">;</span>
-    <span class="c1">// If speed is more important than code space, you can replace this with a lookup into a 256 byte array.</span>
+    <span class="c1">// If speed is more important than code space,</span>
+    <span class="c1">// you can replace this with a lookup into a 256 byte array.</span>
     <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span> <span class="o">&gt;=</span> <span class="sc">&#39;A&#39;</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">p</span> <span class="o">&lt;=</span> <span class="sc">&#39;Z&#39;</span><span class="p">)</span> <span class="c1">// 1-26</span>
       <span class="n">encoded</span> <span class="o">+=</span> <span class="o">*</span><span class="n">p</span> <span class="o">-</span> <span class="sc">&#39;A&#39;</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span> <span class="o">&gt;=</span> <span class="sc">&#39;0&#39;</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">p</span> <span class="o">&lt;=</span> <span class="sc">&#39;9&#39;</span><span class="p">)</span> <span class="c1">// 27-36</span>
       <span class="n">encoded</span> <span class="o">+=</span> <span class="o">*</span><span class="n">p</span> <span class="o">-</span> <span class="sc">&#39;0&#39;</span> <span class="o">+</span> <span class="mi">27</span><span class="p">;</span>
     <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span> <span class="o">==</span> <span class="sc">&#39;-&#39;</span><span class="p">)</span> <span class="c1">// 37</span>
       <span class="n">encoded</span> <span class="o">+=</span> <span class="mi">37</span><span class="p">;</span>
-    <span class="c1">// These are just place holders. If other characters make more sense, change these.</span>
-    <span class="c1">// Be sure to change them in the decode array below too.</span>
+    <span class="c1">// These are just place holders. If other characters make more sense,</span>
+    <span class="c1">// change these. Be sure to change them in the decode array below too.</span>
     <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span> <span class="o">==</span> <span class="sc">&#39;/&#39;</span><span class="p">)</span> <span class="c1">// 38</span>
       <span class="n">encoded</span> <span class="o">+=</span> <span class="mi">38</span><span class="p">;</span>
     <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span> <span class="o">==</span> <span class="sc">&#39;.&#39;</span><span class="p">)</span> <span class="c1">// 39</span>
