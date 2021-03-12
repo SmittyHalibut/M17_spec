@@ -387,7 +387,7 @@ For mixed voice and data payloads, the voice data is stored first, then the data
 <td><p>40 bits of full LSF</p></td>
 </tr>
 <tr class="row-odd"><td><p>40..42</p></td>
-<td><p>A modulo 6 counter (LICH_CNT) for LICH re-assembly</p></td>
+<td><p>A modulo 6 counter (LICH_CNT) for LSF re-assembly</p></td>
 </tr>
 <tr class="row-even"><td><p>43..47</p></td>
 <td><p>5-bit Color Code (CC)</p></td>
@@ -436,37 +436,40 @@ LSF message and understand how to receive the in-progress stream.</p>
 <p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Stream consisting of one superframe</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-default" id="id11">
-<div class="graphviz"><img src="_images/graphviz-3db0b3762f829ea1d9ec02ff25bfc12ecb86c1ac.png" alt="digraph D{
+<div class="graphviz"><img src="_images/graphviz-0e2445fcbb5e4623cee0a5459126ba10a7c4db3a.png" alt="digraph D{
   size=&quot;4,6&quot;;
   node [shape=record];
   {rank=same c0 c1 golay_24_12}
   {rank=same p0 p1}
   {rank=same i0 i1}
 
-  c0[label=&quot;conv coder&quot;]
-  p0[label=&quot;Puncture P1&quot;]
-  i0[label=&quot;interleave&quot;]
+  c0[label=&quot;conv. coder&quot;]
+  p0[label=&quot;P_1 puncturer&quot;]
+  i0[label=&quot;interleaver&quot;]
   w0[label=&quot;decorrelator&quot;]
-  s0[label=&quot;add sync&quot;]
-  chunker_48[label=&quot;chunk 48 bits&quot;]
-  golay_24_12[label=&quot;golay(24, 12)&quot;]
+  s0[label=&quot;add LSF_SYNC&quot;]
+  l0[label=&quot;LICH combiner&quot;]
+  chunker_40[label=&quot;chunk 40 bits&quot;]
+  golay_24_12[label=&quot;Golay (24, 12)&quot;]
 
-  c1[label=&quot;conv coder&quot;]
-  p1[label=&quot;Puncture P2&quot;]
-  i1[label=&quot;interleave&quot;]
+  c1[label=&quot;conv. coder&quot;]
+  p1[label=&quot;P_2 puncturer&quot;]
+  i1[label=&quot;interleaver&quot;]
   w1[label=&quot;decorrelator&quot;]
-  s1[label=&quot;add sync&quot;]
-  fn[label=&quot;Add FN&quot;]
+  s1[label=&quot;add FRAME_SYNC&quot;]
+  fn[label=&quot;add FN&quot;]
   chunker_128[label=&quot;chunk 128 bits&quot;]
 
   framecomb[label=&quot;Frame Combiner&quot;]
   supercomb[label=&quot;Superframe Combiner&quot;]
 
+  counter -&gt; l0
+  &quot;color code&quot; -&gt; l0
   LSF -&gt; c0 -&gt; p0 -&gt; i0 -&gt; w0 -&gt; s0 -&gt; supercomb
-  LSF -&gt; chunker_48 -&gt; golay_24_12 -&gt; framecomb
+  LSF -&gt; chunker_40 -&gt; l0 -&gt; golay_24_12 -&gt; framecomb
   data -&gt; chunker_128 -&gt; fn -&gt; CRC -&gt; c1 -&gt; p1 -&gt; framecomb
   framecomb -&gt; i1 -&gt; w1 -&gt; s1 -&gt; supercomb
-  Preamble -&gt; supercomb
+  preamble -&gt; supercomb
 }" class="graphviz" /></div>
 <p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">An overview of the forward dataflow</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
 </div>
