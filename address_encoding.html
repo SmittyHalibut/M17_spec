@@ -114,7 +114,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#interoperability">Interoperability</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dmr">DMR</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#d-star">D-Star</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#interoperability-challenges">Interoperability Challenges</a></li>
 </ul>
 </li>
 </ul>
@@ -198,8 +197,6 @@
 addresses) are encoded into these 6 bytes in the following ways:</p>
 <ul class="simple">
 <li><p>An address of 0 is invalid.</p></li>
-</ul>
-<ul class="simple">
 <li><p>Address values between 1 and 262143999999999 (which is
 <span class="math notranslate nohighlight">\(40^9-1\)</span>), up to 9 characters of text are encoded using
 base40, described below.</p></li>
@@ -210,8 +207,8 @@ base40, described below.</p></li>
 <li><p>An address of 0xFFFFFFFFFFFF is a broadcast. All stations should
 receive and listen to this message.</p></li>
 </ul>
-<table class="docutils align-default" id="id6">
-<caption><span class="caption-number">Table 20 </span><span class="caption-text">Address scheme</span><a class="headerlink" href="#id6" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 20 </span><span class="caption-text">Address scheme</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 36%" />
 <col style="width: 18%" />
@@ -321,8 +318,8 @@ encoding.</p>
 longer special event callsigns. Also, we want to extend our callsigns
 (see below). So we want more than 6 characters. How many bits do we
 need to represent more characters:</p>
-<table class="docutils align-default" id="id7">
-<caption><span class="caption-number">Table 21 </span><span class="caption-text">bits per characters</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-number">Table 21 </span><span class="caption-text">bits per characters</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 33%" />
@@ -356,8 +353,8 @@ need to represent more characters:</p>
 <p>Of these, 9 characters into 6 bytes seems the sweet spot. Given 9
 characters, how large can we make the alphabet without using more than
 6 bytes?</p>
-<table class="docutils align-default" id="id8">
-<caption><span class="caption-number">Table 22 </span><span class="caption-text">alphabet size vs bytes</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-number">Table 22 </span><span class="caption-text">alphabet size vs bytes</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 33%" />
@@ -404,15 +401,15 @@ changes.</p>
 <h3>Multiple Stations<a class="headerlink" href="#multiple-stations" title="Permalink to this headline">¶</a></h3>
 <p>To allow for multiple stations by the same operator, we borrow the use
 of the ‘-‘ character from AX.25 and the SSID field. A callsign such as
-“KR6ZY-1” is considered a different station than “KR6ZY-2” or even
-“KR6ZY”, but it is understood that these all belong to the same
-operator, “KR6ZY”</p>
+“AB1CD-1” is considered a different station than “AB1CD-2” or even
+“AB1CD”, but it is understood that these all belong to the same
+operator, “AB1CD”</p>
 </div>
 <div class="section" id="temporary-modifiers">
 <h3>Temporary Modifiers<a class="headerlink" href="#temporary-modifiers" title="Permalink to this headline">¶</a></h3>
 <p>Similarly, suffixes are often added to callsign to indicate temporary
-changes of status, such as “KR6ZY/M” for a mobile station, or
-“KR6ZY/AE” to signify that I have Amateur Extra operating privileges
+changes of status, such as “AB1CD/M” for a mobile station, or
+“AB1CD/AE” to signify that I have Amateur Extra operating privileges
 even though the FCC database may not yet be updated. So the ‘/’ is
 included in the base40 alphabet.  The difference between ‘-‘ and ‘/’
 is that ‘-‘ are considered different stations, but ‘/’ are NOT. They
@@ -442,17 +439,6 @@ following networks are defined:</p></li>
 <div class="section" id="d-star">
 <h4>D-Star<a class="headerlink" href="#d-star" title="Permalink to this headline">¶</a></h4>
 <p>D-Star reflectors have well defined names: REFxxxY which are encoded directly into base40.</p>
-</div>
-<div class="section" id="interoperability-challenges">
-<h4>Interoperability Challenges<a class="headerlink" href="#interoperability-challenges" title="Permalink to this headline">¶</a></h4>
-<p>We’ll need to provide a source ID on the other network. Not sure how
-to do that, and it’ll probably be unique for each network we want to
-interoperate with. Maybe write the DMR/BM gateway to automatically
-lookup a callsign in the DMR database and map it to a DMR ID? Just
-thinking out loud.</p>
-<p>We will have to transcode CODEC2 to whatever the other network uses
-(pretty much AMBE of one flavor or another.) I’d be curious to see how
-that sounds.</p>
 </div>
 </div>
 </div>

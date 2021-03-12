@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#preamble">Preamble</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bit-types">Bit types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#error-correction-coding-schemes-and-bit-type-conversion">Error correction coding schemes and bit type conversion</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#link-setup-frame">Link setup frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#link-setup-frame-lsf">Link setup frame (LSF)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#subsequent-frames">Subsequent frames</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#golay-24-12">Golay (24,12)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#convolutional-encoder">Convolutional encoder</a></li>
@@ -251,7 +251,7 @@ in type 4 bits (see <a class="reference internal" href="#bit-types"><span class=
 <div class="section" id="preamble">
 <h2>Preamble<a class="headerlink" href="#preamble" title="Permalink to this headline">¶</a></h2>
 <p>Every transmission starts with a preamble, which shall consist of at
-least 40ms of alternating -3, +3… symbols. This is equivalent to 40
+least 40 ms of alternating -3, +3… symbols. This is equivalent to 40
 milliseconds of a 2400 Hz tone</p>
 </div>
 <div class="section" id="bit-types">
@@ -291,8 +291,8 @@ all the frame fields.</p>
 <h2>Error correction coding schemes and bit type conversion<a class="headerlink" href="#error-correction-coding-schemes-and-bit-type-conversion" title="Permalink to this headline">¶</a></h2>
 <p>Two distinct <a class="reference internal" href="glossary.html#term-ecc"><span class="xref std std-term">ECC</span></a>/<a class="reference internal" href="glossary.html#term-fec"><span class="xref std std-term">FEC</span></a> schemes are used for different parts of
 the transmission.</p>
-<div class="section" id="link-setup-frame">
-<h3>Link setup frame<a class="headerlink" href="#link-setup-frame" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="link-setup-frame-lsf">
+<h3>Link setup frame (LSF)<a class="headerlink" href="#link-setup-frame-lsf" title="Permalink to this headline">¶</a></h3>
 <div class="figure align-default" id="id9">
 <img alt="_images/link_setup_frame_encoding.svg" src="_images/link_setup_frame_encoding.svg" /><p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">ECC stages for the link setup frame</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
 </div>
@@ -312,9 +312,9 @@ transmitted. Interleaving is used to combat error bursts.</p>
 <div class="figure align-default" id="id10">
 <img alt="_images/frame_encoding.svg" src="_images/frame_encoding.svg" /><p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">ECC stages of subsequent frames</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
 </div>
-<p>A 48-bit (type 1) chunk of LICH is partitioned into 4 12-bit parts and
-encoded using Golay (24, 12) code. This produces 96 encoded LICH bits
-of type 2.</p>
+<p>A 48-bit (type 1) chunk of the LSF is partitioned into 4 12-bit parts and
+encoded using Golay (24, 12) code. This produces 96 encoded bits
+of type 2. These bits are used in the Link Information Channel (LICH).</p>
 <p>FN, payload and CRC is 160 bits which are convolutionally encoded in a manner
 analogous to that of the link setup frame. A total of 164 bits is
 being encoded resulting in 328 type 2 bits. These bits are punctured
@@ -335,27 +335,35 @@ the 12 bit data, resulting in a 24 bit encoded chunk.</p>
 \[\begin{align}
 G =&amp; x^{11} + x^{10} + x^6 + x^5 + x^4 + x^2 + 1
 \end{align}\]</div>
-<p>The output of the Golay encoder looks like:</p>
+<p>The output of the Golay encoder is shown in the table below.</p>
 <blockquote>
 <div><table class="docutils align-default">
 <colgroup>
-<col style="width: 35%" />
-<col style="width: 33%" />
-<col style="width: 31%" />
+<col style="width: 27%" />
+<col style="width: 23%" />
+<col style="width: 30%" />
+<col style="width: 20%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p>Data</p></td>
+<tr class="row-odd"><td><p>Field</p></td>
+<td><p>Data</p></td>
 <td><p>Check bits</p></td>
 <td><p>Parity</p></td>
 </tr>
-<tr class="row-even"><td><p>23-12 (12 bits)</p></td>
-<td><p>11-1 (11 bits)</p></td>
-<td><p>0 (1 bit)</p></td>
+<tr class="row-even"><td><p>Position</p></td>
+<td><p>23..12</p></td>
+<td><p>11..1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Length</p></td>
+<td><p>12</p></td>
+<td><p>11</p></td>
+<td><p>1</p></td>
 </tr>
 </tbody>
 </table>
 </div></blockquote>
-<p>Four of these 24-bit blocks are used to encode the LICH.</p>
+<p>Four of these 24-bit blocks are used to reconstruct the LSF.</p>
 </div>
 <div class="section" id="convolutional-encoder">
 <h3>Convolutional encoder<a class="headerlink" href="#convolutional-encoder" title="Permalink to this headline">¶</a></h3>
