@@ -282,18 +282,21 @@ special number (eg. a group)</p></td>
 <tr class="row-even"><td><p>0</p></td>
 <td><p>Packet/stream indicator, 0=packet, 1=stream</p></td>
 </tr>
-<tr class="row-odd"><td><p>1-2</p></td>
+<tr class="row-odd"><td><p>1..2</p></td>
 <td><p>Data type indicator, <span class="math notranslate nohighlight">\(01_2\)</span> =data (D), <span class="math notranslate nohighlight">\(10_2\)</span> =voice
 (V), <span class="math notranslate nohighlight">\(11_2\)</span> =V+D, <span class="math notranslate nohighlight">\(00_2\)</span> =reserved</p></td>
 </tr>
-<tr class="row-even"><td><p>3-4</p></td>
+<tr class="row-even"><td><p>3..4</p></td>
 <td><p>Encryption type, <span class="math notranslate nohighlight">\(00_2\)</span> =none, <span class="math notranslate nohighlight">\(01_2\)</span> =AES,
 <span class="math notranslate nohighlight">\(10_2\)</span> =scrambling, <span class="math notranslate nohighlight">\(11_2\)</span> =other/reserved</p></td>
 </tr>
-<tr class="row-odd"><td><p>5-6</p></td>
+<tr class="row-odd"><td><p>5..6</p></td>
 <td><p>Encryption subtype (meaning of values depends on encryption type)</p></td>
 </tr>
-<tr class="row-even"><td><p>7-15</p></td>
+<tr class="row-even"><td><p>7..10</p></td>
+<td><p>Channel Access Number (CAN)</p></td>
+</tr>
+<tr class="row-odd"><td><p>11..15</p></td>
 <td><p>Reserved (don’t care)</p></td>
 </tr>
 </tbody>
@@ -389,8 +392,11 @@ For mixed voice and data payloads, the voice data is stored first, then the data
 <tr class="row-odd"><td><p>40..42</p></td>
 <td><p>A modulo 6 counter (LICH_CNT) for LSF re-assembly</p></td>
 </tr>
-<tr class="row-even"><td><p>43..47</p></td>
-<td><p>5-bit Color Code (CC)</p></td>
+<tr class="row-even"><td><p>43..46</p></td>
+<td><p>4-bit Channel Access Number (CAN)</p></td>
+</tr>
+<tr class="row-odd"><td><p>47</p></td>
+<td><p>Reserved</p></td>
 </tr>
 </tbody>
 </table>
@@ -436,7 +442,7 @@ LSF message and understand how to receive the in-progress stream.</p>
 <p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Stream consisting of one superframe</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-default" id="id11">
-<div class="graphviz"><img src="_images/graphviz-0e2445fcbb5e4623cee0a5459126ba10a7c4db3a.png" alt="digraph D{
+<div class="graphviz"><img src="_images/graphviz-d498859d06ab4930231c378c674eabae10ee905b.png" alt="digraph D{
   size=&quot;4,6&quot;;
   node [shape=record];
   {rank=same c0 c1 golay_24_12}
@@ -464,7 +470,7 @@ LSF message and understand how to receive the in-progress stream.</p>
   supercomb[label=&quot;Superframe Combiner&quot;]
 
   counter -&gt; l0
-  &quot;color code&quot; -&gt; l0
+  &quot;CAN&quot; -&gt; l0
   LSF -&gt; c0 -&gt; p0 -&gt; i0 -&gt; w0 -&gt; s0 -&gt; supercomb
   LSF -&gt; chunker_40 -&gt; l0 -&gt; golay_24_12 -&gt; framecomb
   data -&gt; chunker_128 -&gt; fn -&gt; CRC -&gt; c1 -&gt; p1 -&gt; framecomb
