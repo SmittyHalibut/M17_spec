@@ -388,10 +388,7 @@ For mixed voice and data payloads, the voice data is stored first, then the data
 <tr class="row-odd"><td><p>40..42</p></td>
 <td><p>A modulo 6 counter (LICH_CNT) for LSF re-assembly</p></td>
 </tr>
-<tr class="row-even"><td><p>43..46</p></td>
-<td><p>4-bit Channel Access Number (CAN)</p></td>
-</tr>
-<tr class="row-odd"><td><p>47</p></td>
+<tr class="row-even"><td><p>43..47</p></td>
 <td><p>Reserved</p></td>
 </tr>
 </tbody>
@@ -438,7 +435,7 @@ LSF message and understand how to receive the in-progress stream.</p>
 <p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Stream consisting of one superframe</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-default" id="id11">
-<div class="graphviz"><img src="_images/graphviz-d498859d06ab4930231c378c674eabae10ee905b.png" alt="digraph D{
+<div class="graphviz"><img src="_images/graphviz-34d3170c03860f90f12b43006301a64a62e764af.png" alt="digraph D{
   size=&quot;4,6&quot;;
   node [shape=record];
   {rank=same c0 c1 golay_24_12}
@@ -449,7 +446,7 @@ LSF message and understand how to receive the in-progress stream.</p>
   p0[label=&quot;P_1 puncturer&quot;]
   i0[label=&quot;interleaver&quot;]
   w0[label=&quot;decorrelator&quot;]
-  s0[label=&quot;add LSF_SYNC&quot;]
+  s0[label=&quot;prepend LSF_SYNC&quot;]
   l0[label=&quot;LICH combiner&quot;]
   chunker_40[label=&quot;chunk 40 bits&quot;]
   golay_24_12[label=&quot;Golay (24, 12)&quot;]
@@ -458,7 +455,7 @@ LSF message and understand how to receive the in-progress stream.</p>
   p1[label=&quot;P_2 puncturer&quot;]
   i1[label=&quot;interleaver&quot;]
   w1[label=&quot;decorrelator&quot;]
-  s1[label=&quot;add FRAME_SYNC&quot;]
+  s1[label=&quot;prepend FRAME_SYNC&quot;]
   fn[label=&quot;add FN&quot;]
   chunker_128[label=&quot;chunk 128 bits&quot;]
 
@@ -466,10 +463,9 @@ LSF message and understand how to receive the in-progress stream.</p>
   supercomb[label=&quot;Superframe Combiner&quot;]
 
   counter -&gt; l0
-  &quot;CAN&quot; -&gt; l0
   LSF -&gt; c0 -&gt; p0 -&gt; i0 -&gt; w0 -&gt; s0 -&gt; supercomb
   LSF -&gt; chunker_40 -&gt; l0 -&gt; golay_24_12 -&gt; framecomb
-  data -&gt; chunker_128 -&gt; fn -&gt; CRC -&gt; c1 -&gt; p1 -&gt; framecomb
+  data -&gt; chunker_128 -&gt; fn -&gt; c1 -&gt; p1 -&gt; framecomb
   framecomb -&gt; i1 -&gt; w1 -&gt; s1 -&gt; supercomb
   preamble -&gt; supercomb
 }" class="graphviz" /></div>
@@ -491,8 +487,8 @@ as 0xAC9A, which is the reversed reciprocal notation</p>
 </dl>
 <p>As M17’s native bit order is most significant bit first, neither the
 input nor the output of the CRC algorithm gets reflected.</p>
-<p>The input to the CRC algorithm consists of the 16 bits of FN and 128
-bits of payload, and then depending on whether the CRC is being computed
+<p>The input to the CRC algorithm consists of DST, SRC (each 48 bits), 16 bits of TYPE field and 128
+bits NONCE, and then depending on whether the CRC is being computed
 or verified either 16 zero bits or the received CRC.</p>
 <p>The test vectors in Table 6 are calculated by feeding the given
 message and then 16 zero bits to the CRC algorithm.</p>
@@ -550,18 +546,21 @@ The packet/stream indicator is set to 0 in the type field.</p>
 <tr class="row-even"><td><p>0</p></td>
 <td><p>Packet/stream indicator, 0=packet, 1=stream</p></td>
 </tr>
-<tr class="row-odd"><td><p>1-2</p></td>
-<td><p>Data type indicator, <span class="math notranslate nohighlight">\(01_2\)</span> =raw (D), <span class="math notranslate nohighlight">\(10_2\)</span> =encapsulated
-(V), <span class="math notranslate nohighlight">\(11_2\)</span> =reserved, <span class="math notranslate nohighlight">\(00_2\)</span> =reserved</p></td>
+<tr class="row-odd"><td><p>1..2</p></td>
+<td><p>Data type indicator, <span class="math notranslate nohighlight">\(01_2\)</span> =data (D), <span class="math notranslate nohighlight">\(10_2\)</span> =voice
+(V), <span class="math notranslate nohighlight">\(11_2\)</span> =V+D, <span class="math notranslate nohighlight">\(00_2\)</span> =reserved</p></td>
 </tr>
-<tr class="row-even"><td><p>3-4</p></td>
+<tr class="row-even"><td><p>3..4</p></td>
 <td><p>Encryption type, <span class="math notranslate nohighlight">\(00_2\)</span> =none, <span class="math notranslate nohighlight">\(01_2\)</span> =AES,
 <span class="math notranslate nohighlight">\(10_2\)</span> =scrambling, <span class="math notranslate nohighlight">\(11_2\)</span> =other/reserved</p></td>
 </tr>
-<tr class="row-odd"><td><p>5-6</p></td>
+<tr class="row-odd"><td><p>5..6</p></td>
 <td><p>Encryption subtype (meaning of values depends on encryption type)</p></td>
 </tr>
-<tr class="row-even"><td><p>7-15</p></td>
+<tr class="row-even"><td><p>7..10</p></td>
+<td><p>Channel Access Number (CAN)</p></td>
+</tr>
+<tr class="row-odd"><td><p>11..15</p></td>
 <td><p>Reserved (don’t care)</p></td>
 </tr>
 </tbody>
