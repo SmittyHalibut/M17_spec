@@ -296,7 +296,7 @@ the transmission.</p>
 <div class="figure align-default" id="id9">
 <img alt="_images/link_setup_frame_encoding.svg" src="_images/link_setup_frame_encoding.svg" /><p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">ECC stages for the link setup frame</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
 </div>
-<p>240 DST, SRC, TYPE, NONCE and CRC type 1 bits are convolutionally
+<p>240 DST, SRC, TYPE, META and CRC type 1 bits are convolutionally
 coded using rate 1/2 coder with constraint K=5. 4 tail bits are used
 to flush the encoder’s state register, giving a total of 244 bits
 being encoded. Resulting 488 type 2 bits are retained for type 3 bits
@@ -429,8 +429,7 @@ smaller matrix with a <em>flattening</em>.</p>
   \end{bmatrix}
 \end{align}</div><p>The puncturing schemes are defined by their partial puncturing matrices:</p>
 <div class="math notranslate nohighlight">
-.. only:: latex
-   \setcounter{MaxMatrixCols}{32}
+\setcounter{MaxMatrixCols}{32}
 
 \begin{align}
 P_1 = &amp; \begin{bmatrix}

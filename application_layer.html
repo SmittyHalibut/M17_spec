@@ -232,12 +232,81 @@ the following protocol identifers are reserved in the M17 packet spec:</p>
 </div>
 <div class="section" id="encryption-types">
 <h2>Encryption Types<a class="headerlink" href="#encryption-types" title="Permalink to this headline">¶</a></h2>
-<p>Encryption is optional and disabled by default. The use of it is only
-allowed if local laws allow to doso.</p>
+<p>Encryption is optional. The use of it may be restricted within some radio
+services and countries, and should only be used if legally permissible.</p>
 <div class="section" id="null-encryption">
 <h3>Null Encryption<a class="headerlink" href="#null-encryption" title="Permalink to this headline">¶</a></h3>
 <p>Encryption type = <span class="math notranslate nohighlight">\(00_2\)</span></p>
 <p>No encryption is performed, payload is sent in clear text.</p>
+<p>The “Encryption SubType” bits in the Stream Type field then indicate
+what data is stored in the 112 bits of the LSF META field.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Encryption SubType bits</p></th>
+<th class="head"><p>LSF META data contents</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(00_2\)</span></p></td>
+<td><p>UTF-8 Text</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(01_2\)</span></p></td>
+<td><p>GNSS Position Data</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(10_2\)</span></p></td>
+<td><p>Reserved</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(11_2\)</span></p></td>
+<td><p>Reserved</p></td>
+</tr>
+</tbody>
+</table>
+<p>All LSF META data must be stored in big endian byte order, as throughout
+the rest of this specification.</p>
+<p>GNSS Position Data stores the 112 bit META field as follows:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Size, in bits</p></th>
+<th class="head"><p>Format</p></th>
+<th class="head"><p>Contents</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>32</p></td>
+<td><p>32-bit fixed point degrees and decimal minutes (TBD)</p></td>
+<td><p>Latitude</p></td>
+</tr>
+<tr class="row-odd"><td><p>32</p></td>
+<td><p>32-bit fixed point degrees and decimal minutes (TBD)</p></td>
+<td><p>Longitude</p></td>
+</tr>
+<tr class="row-even"><td><p>16</p></td>
+<td><p>unsigned integer</p></td>
+<td><p>Altitude, in feet MSL. Stored +1500, so a stored value of 0 represents -1500 MSL. Subtract 1500 feet when parsing.</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>unsigned integer</p></td>
+<td><p>Course in degrees true North</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>unsigned integer</p></td>
+<td><p>Speed in miles per hour.</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>Reserved values</p></td>
+<td><p>Transmitter/Object description field</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="scrambler">
 <h3>Scrambler<a class="headerlink" href="#scrambler" title="Permalink to this headline">¶</a></h3>
@@ -301,44 +370,34 @@ algorithm.  Figures 5 to 8 show block diagrams of the algorithm</p>
 <div class="section" id="advanced-encryption-standard-aes">
 <h3>Advanced Encryption Standard (AES)<a class="headerlink" href="#advanced-encryption-standard-aes" title="Permalink to this headline">¶</a></h3>
 <p>Encryption type = <span class="math notranslate nohighlight">\(10_2\)</span></p>
-<p>This method uses AES block cipher in counter (CTR) mode. 96-bit nonce
-value is extracted from the NONCE field, as the 96 most significant
-bits of it. The highest 16 bits of the counter are the remaining 16
-bits of the NONCE field. FN field value is then used as the
-counter. The 16 bit frame counter and 40 ms frames can provide for
-over 20 minutes of streaming without rolling over the counter <a class="footnote-reference brackets" href="#fn-roll" id="id2">1</a>. This
-method adapts 16-bit counter to the standard 32-bit CTR for the
-encryption. FN counter always start from 0 (zero).</p>
+<p>This method uses AES block cipher in counter (CTR) mode, with a 96-bit
+nonce that should never be used for more than one separate stream and a 32 bit CTR.</p>
+<p>The 96-bit AES nonce value is extracted from the 96 most significant
+bits of the META field, and the remaining 16 bits of the META field
+form the highest 16 bits of the 32 bit counter.  The FN (Frame Number)
+field value is then used to fill out the lower 16 bits of the counter,
+and always starts from 0 (zero) in a new voice stream.</p>
+<p>The 16 bit frame number and 40 ms frames can provide for over 20 minutes
+of streaming without rolling over the counter <a class="footnote-reference brackets" href="#fn-roll" id="id2">1</a>.</p>
 <dl class="footnote brackets">
 <dt class="label" id="fn-roll"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
 <dd><p>The effective capacity of the counter is 15 bits, as the
-MSB is used for transmission end signalling</p>
+MSB is used for transmission end signalling. At 40ms per
+frame, or 25 frames per second, and 2**15 frames, we get
+2**15 frames / 25 frames per second = 1310 seconds, or 21
+minutes and some change.</p>
 </dd>
 </dl>
-<p>The nonce value should be generated with a hardware random number
-generator or any other method of generating non-repeating
-values. Nonce values must be used only once. It is obvious that with a
-finite number of nonce bits, the probability of nonce collision
-approaches 1. We assume that the transmission is secure for 237 frames
-using a single key. It is recommended to change keys after that
-period.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>In CTR mode, AES encryption is malleable <a class="reference internal" href="#ctr" id="id3"><span>[CTR]</span></a> <a class="reference internal" href="#crypto" id="id4"><span>[CRYPTO]</span></a>.
-That is, an attacker can change the contents of the encrypted message
-without decrypting it. This means that recipients of AES-encrypted data
-must not trust that the data is authentic.
-Users who require that received messages are proven to be exactly as-sent by
-the sender should add application-layer authentication, such as HMAC.
-In the future, use of a different mode, such as Galois/Counter Mode, could
-alleviate this issue <a class="reference internal" href="#crypto" id="id5"><span>[CRYPTO]</span></a>.</p>
-</div>
-<p>To combat replay attacks, a 32-bit timestamp shall be embedded into
-the NONCE field. The field structure is shown in Table 9. Timestamp is 32 LSB portion of
-the number of seconds that elapsed since the beginning of 1970-01-01,
-00:00:00 UTC, minus leap seconds (a.k.a. “unix time”).</p>
+<p>The random part of the nonce value should be generated with a hardware
+random number generator or any other method of generating non-repeating
+values.</p>
+<p>To combat replay attacks, a 32-bit timestamp shall be embedded into the
+cryptographic nonce field. The field structure of the 96 bit nonce is
+shown in Table 9. Timestamp is 32 LSB portion of the number of seconds
+that elapsed since the beginning of 1970-01-01, 00:00:00 UTC, minus leap
+seconds (a.k.a. “unix time”).</p>
 <table class="docutils align-default" id="id11">
-<caption><span class="caption-number">Table 19 </span><span class="caption-text">NONCE field structure</span><a class="headerlink" href="#id11" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-number">Table 19 </span><span class="caption-text">96 bit nonce field structure</span><a class="headerlink" href="#id11" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 33%" />
@@ -346,7 +405,7 @@ the number of seconds that elapsed since the beginning of 1970-01-01,
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>TIMESTAMP</p></th>
-<th class="head"><p>NONCE</p></th>
+<th class="head"><p>RANDOM DATA</p></th>
 <th class="head"><p>CTR_HIGH</p></th>
 </tr>
 </thead>
@@ -359,6 +418,17 @@ the number of seconds that elapsed since the beginning of 1970-01-01,
 </table>
 <p><strong>CTR_HIGH</strong> field initializes the highest 16 bits of the CTR, with
 the rest of the counter being equal to the FN counter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In CTR mode, AES encryption is malleable <a class="reference internal" href="#ctr" id="id3"><span>[CTR]</span></a> <a class="reference internal" href="#crypto" id="id4"><span>[CRYPTO]</span></a>.
+That is, an attacker can change the contents of the encrypted message
+without decrypting it. This means that recipients of AES-encrypted data
+must not trust that the data is authentic.
+Users who require that received messages are proven to be exactly as-sent by
+the sender should add application-layer authentication, such as HMAC.
+In the future, use of a different mode, such as Galois/Counter Mode, could
+alleviate this issue <a class="reference internal" href="#crypto" id="id5"><span>[CRYPTO]</span></a>.</p>
+</div>
 <dl class="citation">
 <dt class="label" id="ctr"><span class="brackets"><a class="fn-backref" href="#id3">CTR</a></span></dt>
 <dd><p>McGrew, David A. “Counter mode security: Analysis and recommendations.” Cisco Systems, November 2, no. 4 (2002).</p>

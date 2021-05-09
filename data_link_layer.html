@@ -194,21 +194,24 @@
 <h1>Data Link Layer<a class="headerlink" href="#data-link-layer" title="Permalink to this headline">¶</a></h1>
 <p>The Data Link layer is split into two modes:</p>
 <ul class="simple">
-<li><p>Packet mode: data are sent in small bursts, on the order of 100s to 1000s of bytes at a time, after</p></li>
+<li><dl class="simple">
+<dt>Packet mode</dt><dd><p>Data are sent in small bursts, on the order of 100s to 1000s of bytes
+at a time, after which the physical layer stops sending data. e.g. messages, beacons, etc.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Stream mode</dt><dd><p>Data are sent in a continuous stream for an indefinite amount of time,
+with no break in physical layer output, until the stream ends. e.g. voice data,
+bulk data transfers, etc.</p>
+</dd>
+</dl>
+</li>
 </ul>
-<p>which the physical layer stops sending data. eg: messages, beacons, etc.
-* Stream mode: data are sent in a continuous stream for an indefinite amount of time, with no
-break in physical layer output, until the stream ends. eg: voice data, bulk data transfers, etc.</p>
 <p>When the physical layer is idle (no RF being transmitted or received),
-the data link defaults to packet mode. ~~To switch to stream mode, a
-start stream packet (detailed later) is sent, immediately followed by
-the switch to stream mode; the Stream of data immediately follows the
-Start Stream packet without disabling the Physical layer. To switch
-out of Stream mode, the stream simply ends and returns the Physical
-layer to the idle state, and the Data Link defaults back to Packet
-mode.~~</p>
-<p>As is the convention with networking protocols, all quantities
-larger than 8 bits are encoded in bigendian.</p>
+the data link defaults to packet mode.</p>
+<p>As is the convention with other networking protocols, all values are
+encoded in big endian byte order.</p>
 <div class="section" id="stream-mode">
 <h2>Stream Mode<a class="headerlink" href="#stream-mode" title="Permalink to this headline">¶</a></h2>
 <p>In Stream Mode, an <em>indefinite</em> amount of payload data is sent continuously without breaks in the
@@ -253,9 +256,9 @@ special number (eg. a group)</p></td>
 <td><p>16 bits</p></td>
 <td><p>Information about the incoming data stream</p></td>
 </tr>
-<tr class="row-even"><td><p>NONCE</p></td>
+<tr class="row-even"><td><p>META</p></td>
 <td><p>112 bits</p></td>
-<td><p>Nonce for encryption</p></td>
+<td><p>Metadata field, suitable for cryptographic metadata like IVs or single-use numbers, or non-crypto metadata like the sender’s GNSS position.</p></td>
 </tr>
 <tr class="row-odd"><td><p>CRC</p></td>
 <td><p>16 bits</p></td>
@@ -304,11 +307,12 @@ special number (eg. a group)</p></td>
 <p>The fields in Table 3 (except tail) form initial LSF. It contains all
 information needed to establish M17 link. Later in the transmission,
 the initial LSF is divided into 6 “chunks” and transmitted
-interleaved with data. The purpose of that is to allow late-joiners to
-receive the LICH at any point of the transmission. The process of
-collecting full LSF takes 6 frames or 6*40 ms = 240 ms. Four TAIL
-bits are needed for the convolutional coder to go back to state 0, so
-also the ending trellis position is known.</p>
+beside the payload data. This allows late-joiners to
+reconstruct the LICH after collecting all the pieces, and start decoding
+the stream even though they missed the beginning of the transmission.
+The process of collecting full LSF takes 6 frames or 6*40 ms = 240
+ms. Four TAIL bits are needed for the convolutional coder to go back to
+state 0, so the ending trellis position is also known.</p>
 <p>Voice coder rate is inferred from TYPE field, bits 1 and 2.</p>
 <table class="docutils align-default" id="id5">
 <caption><span class="caption-number">Table 5 </span><span class="caption-text">Voice coder rates for different data type indicators</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
@@ -367,7 +371,7 @@ also the ending trellis position is known.</p>
 </table>
 <p>The most significant bit in the FN counter is used for transmission
 end signalling. When transmitting the last frame, it shall be set to 1
-(one).</p>
+(one), and 0 (zero) in all other frames.</p>
 <p>The payload is used so that earlier data in the voice stream is sent first.
 For mixed voice and data payloads, the voice data is stored first, then the data.</p>
 <table class="docutils align-default" id="id7">
@@ -487,8 +491,8 @@ as 0xAC9A, which is the reversed reciprocal notation</p>
 </dl>
 <p>As M17’s native bit order is most significant bit first, neither the
 input nor the output of the CRC algorithm gets reflected.</p>
-<p>The input to the CRC algorithm consists of DST, SRC (each 48 bits), 16 bits of TYPE field and 128
-bits NONCE, and then depending on whether the CRC is being computed
+<p>The input to the CRC algorithm consists of DST, SRC (each 48 bits), 16 bits of TYPE field and 112
+bits META, and then depending on whether the CRC is being computed
 or verified either 16 zero bits or the received CRC.</p>
 <p>The test vectors in Table 6 are calculated by feeding the given
 message and then 16 zero bits to the CRC algorithm.</p>
@@ -568,6 +572,14 @@ The packet/stream indicator is set to 0 in the type field.</p>
 <p>Raw packet frames have no packet type metadata associated with them.  Encapsulated packet
 format is discussed in <a class="reference internal" href="application_layer.html#packet-superframes"><span class="std std-ref">Packet Superframes</span></a> in the Application Layer section.  This
 provides data type information and is the preferred format for use on M17.</p>
+<p>When encryption type is <span class="math notranslate nohighlight">\(00_2\)</span>, meaning no encryption, the
+encryption subtype bits are used to indicate the contents of the
+META field in the LSF.  Since that space would otherwise go be unused,
+we can store small bits of data in that field such as free text or the
+sender’s GNSS position.</p>
+<p>Encryption type and subtype bits, including the plaintext data formats
+when not using encryption, are described in more detail in the Application
+Layer section of this document.</p>
 <p>Currently the contents of the source and destination fields are arbitrary as no behavior
 is defined which depends on the content of these fields.  The only requirement is that
 the content is base-40 encoded.</p>
