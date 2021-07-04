@@ -225,8 +225,8 @@ Later specifications may require this port.</p>
 <td><p>Random bits, changed for each PTT or stream, but consistent from frame to frame within a stream</p></td>
 </tr>
 <tr class="row-odd"><td><p>LICH</p></td>
-<td><p>sizeof(LICH)*8 bits</p></td>
-<td><p>A full LICH frame (dst, src, streamtype, META field) as defined earlier</p></td>
+<td><p>240 bits</p></td>
+<td><p>The meaningful contents of a LICH frame (dst, src, streamtype, META field, CRC16) as defined earlier.</p></td>
 </tr>
 <tr class="row-even"><td><p>FN</p></td>
 <td><p>16 bits</p></td>
